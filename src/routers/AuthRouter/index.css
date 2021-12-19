@@ -1,0 +1,12 @@
+.Auth-Router {
+  height: 100vh;
+  background-image: radial-gradient(
+    circle,
+    #29335c,
+    #2f2441,
+    #281929,
+    #1a0f16,
+    #000000
+  );
+  color: #fff;
+}
