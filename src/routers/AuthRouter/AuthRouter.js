@@ -12,7 +12,6 @@ const AuthRouter = () => {
       <Routes>
         <Route path='/login' element={<LoginScreen />} />
         <Route path='/register' element={<RegisterScreen />} />
-        <Route path='/*' element={<LoginScreen />} />
       </Routes>
     </div>
   );

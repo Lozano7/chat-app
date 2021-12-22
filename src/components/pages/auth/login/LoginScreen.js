@@ -3,14 +3,11 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
 } from 'firebase/auth';
-import { doc, setDoc, Timestamp, updateDoc } from 'firebase/firestore';
-import React, { useEffect } from 'react';
+import { doc, updateDoc } from 'firebase/firestore';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import {
-  initialStateUsers,
-  userActions,
-} from '../../../../app/slices/usersSlide';
+import { userActions } from '../../../../app/slices/usersSlide';
 import { auth, db } from '../../../../firebase/firebase-config';
 import validarForm from '../../../../helpers/validarForm';
 import Button from '../../../button/Button';
@@ -26,7 +23,6 @@ const LoginScreen = () => {
     error: null,
     loading: false,
   });
-
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
@@ -38,40 +34,23 @@ const LoginScreen = () => {
     const provider = new GoogleAuthProvider();
     try {
       const { user } = await signInWithPopup(auth, provider);
-      const { uid, email, displayName: name } = user;
-      await setDoc(doc(db, 'users', uid), {
-        uid: uid,
-        name,
-        email,
-        createdAt: Timestamp.fromDate(new Date()),
+      await updateDoc(doc(db, 'users', user.uid), {
         isOnline: true,
       });
       const users = {
         user: {
-          name,
-          email,
+          name: user.displayName,
+          email: email,
         },
         logged: true,
       };
-      localStorage.setItem('user', JSON.stringify(users));
       reset();
-      dispatch(
-        userActions.login({
-          user: {
-            name,
-            email,
-          },
-          logged: true,
-        })
-      );
-      navigate('/', {
-        replace: true,
-      });
+      dispatch(userActions.login(users));
     } catch (error) {
-      console.log(error);
       handleLoadingErrors({ error: 'Authentication failed', loading: false });
       setTimeout(() => {
         reset();
+        navigate('/auth/register');
       }, 2000);
     }
   };
@@ -98,10 +77,8 @@ const LoginScreen = () => {
           },
           logged: true,
         };
-        localStorage.setItem('user', JSON.stringify(users));
         reset();
         dispatch(userActions.login(users));
-        navigate('/');
       } catch (error) {
         console.log(error);
         const errorMessage = ('' + error)
@@ -115,10 +92,6 @@ const LoginScreen = () => {
       }
     }
   };
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user')) || initialStateUsers;
-    dispatch(userActions.login(user));
-  }, [dispatch]);
   return (
     <div className='container-form'>
       <div className='form-login'>

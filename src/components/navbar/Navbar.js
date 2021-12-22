@@ -24,7 +24,7 @@ const Navbar = () => {
         <LinkRouter
           className='navbar-brand'
           to={{
-            pathname: '/auth/login',
+            pathname: '/',
             replace: true,
           }}
           text='Chat App'

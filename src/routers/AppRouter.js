@@ -21,7 +21,7 @@ const AppRouter = () => {
             }
           />
           <Route
-            path='/'
+            path='/*'
             element={
               <PrivateRoute>
                 <Home />

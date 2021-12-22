@@ -1,12 +1,12 @@
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, Timestamp } from 'firebase/firestore';
-import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import {
-  initialStateUsers,
-  userActions,
-} from '../../../../app/slices/usersSlide';
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth';
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import { userActions } from '../../../../app/slices/usersSlide';
 import { auth, db } from '../../../../firebase/firebase-config';
 import validarForm from '../../../../helpers/validarForm';
 import { useForm } from '../../../../hooks/useForm';
@@ -24,7 +24,6 @@ const RegisterScreen = () => {
     error: null,
     loading: false,
   });
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { name, email, password, passwordConfirm, error, loading } = formValues;
 
@@ -59,10 +58,8 @@ const RegisterScreen = () => {
           },
           logged: true,
         };
-        localStorage.setItem('user', JSON.stringify(user));
         reset();
         dispatch(userActions.login(user));
-        navigate('/');
       } catch (error) {
         const errorMessage = ('' + error)
           .slice(-22)
@@ -75,12 +72,38 @@ const RegisterScreen = () => {
       }
     }
   };
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user')) || initialStateUsers;
-    dispatch(userActions.login(user));
-  }, [dispatch]);
-
+  const handleSignInWithGoogle = async () => {
+    handleLoadingErrors({ loading: true });
+    const provider = new GoogleAuthProvider();
+    try {
+      const { user } = await signInWithPopup(auth, provider);
+      const { uid, email, displayName: name } = user;
+      await setDoc(doc(db, 'users', uid), {
+        uid: uid,
+        name,
+        email,
+        createdAt: Timestamp.fromDate(new Date()),
+        isOnline: true,
+        avatar: '',
+        avatarPath: '',
+      });
+      const users = {
+        user: {
+          name: user.displayName,
+          email: email,
+        },
+        logged: true,
+      };
+      reset();
+      dispatch(userActions.login(users));
+    } catch (error) {
+      console.log(error);
+      handleLoadingErrors({ error: 'Authentication failed', loading: false });
+      setTimeout(() => {
+        reset();
+      }, 2000);
+    }
+  };
   return (
     <div className='container-form'>
       <div className='formRegister'>
@@ -127,9 +150,15 @@ const RegisterScreen = () => {
             </p>
           )}
         </div>
+        <Button
+          btnColor='btn-danger mb-4'
+          text={loading ? 'Loading...' : 'Register with Google'}
+          onClick={handleSignInWithGoogle}
+          disable={loading}
+        />
         <div className='d-flex justify-content-center'>
           <LinkRouter
-            className='btn btn-danger mb-4'
+            className='btn btn-success mb-4'
             to='/auth/login'
             text='Already have an account?'
           />

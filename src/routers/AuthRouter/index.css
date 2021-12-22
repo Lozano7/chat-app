@@ -1,5 +1,5 @@
 .Auth-Router {
-  height: 100vh;
+  min-height: 100vh;
   background-image: radial-gradient(
     circle,
     #29335c,
