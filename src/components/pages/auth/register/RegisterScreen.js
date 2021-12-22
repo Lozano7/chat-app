@@ -124,10 +124,6 @@ const RegisterScreen = () => {
               value={email}
               onChange={handleInputChange}
             />
-            <label className='text-danger' style={{ fontSize: '12px' }}>
-              The password must have letters, numbers and special
-              characters[!@#$%^&*]
-            </label>
             <Input
               type='password'
               placeholder='Password have to be 8 characters or more'
@@ -135,6 +131,13 @@ const RegisterScreen = () => {
               value={password}
               onChange={handleInputChange}
             />
+            <label
+              className='text-light'
+              style={{ fontSize: '12px', marginBottom: '10px' }}
+            >
+              The password must have letters, numbers and special
+              characters[!@#$%^&*]
+            </label>
             <Input
               type='password'
               placeholder='Confirm Password'
